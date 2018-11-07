@@ -1,0 +1,16 @@
+ofgrab
+~~~~~~
+
+Archives videos and images from onlyfans.com profiles.
+Nothing more nothing less.
+
+Installation:
+- pip install -r requirements.txt
+
+Usage:
+- Use your browser to log in on onlyfans.com
+- Find the cookie called 'sess' and copy the id
+- /ofgrab.py <PROFILE_NAME> <YOUR_SESSION_ID>
+
+License:
+GPLv3+
