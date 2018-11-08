@@ -10,7 +10,12 @@ Installation:
 Usage:
 - Use your browser to log in on onlyfans.com
 - Find the cookie called 'sess' and copy the id
-- /ofgrab.py <PROFILE_NAME> <YOUR_SESSION_ID>
+- ./ofgrab.py <PROFILE_NAME> <YOUR_SESSION_ID>
+
+Trivia:
+- In the JSON payload for each post there’s a field called "fake_favorites_count".
+  Haven’t found any JS code which makes use of it, but I wouldn’t be suprised if
+  they have some monkey business going on.
 
 License:
 GPLv3+
