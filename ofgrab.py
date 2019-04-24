@@ -30,7 +30,7 @@ class Grabber:
         self.session = requests.Session()
         self.posts = []
 
-    def prepare_auth(self, session_id):
+    def prepare_auth(self, session_id, user_agent):
         auth_cookie = {
             'domain': '.onlyfans.com',
             'expires': None,
@@ -40,13 +40,16 @@ class Grabber:
             'version': 0
         }
         self.session.cookies.set(**auth_cookie)
-        self.session.headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0'}
+        self.session.headers = {'User-Agent': user_agent}
 
     def parse_posts(self, posts):
         for post in posts:
-            post_id = post['item_id']
-            post_author = post.select('a[class="post_login"]')[0].text.strip().lstrip('@')
-            post_title = post.select('div[class="post_title"]')[0].text.strip()
+            post_id = post['data-id']
+            post_author = post.select('div[class="g-user-username"]')[0].text.strip().lstrip('@')
+            try:
+                post_title = post.select('div[class="b-post__text"]')[0].text.strip()
+            except IndexError:
+                post_title = ""
 
             if post.select('div[class="video-wrapper"]'):
                 try:
@@ -70,7 +73,7 @@ class Grabber:
         r = self.session.get('https://onlyfans.com/{}'.format(self.profile_name))
 
         soup = BeautifulSoup(r.text, 'lxml')
-        posts = soup.select('div[class^="user_post user_post_"]')
+        posts = soup.select('div[class^="b-post b-post_"]')
         if posts:
             print('[!] Found {} posts on the start page'.format(len(posts)))
             self.parse_posts(posts)
@@ -124,11 +127,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('profile', type=str, help='profile to archive')
     parser.add_argument('session', type=str, help='active browser session')
+    parser.add_argument('user_agent', type=str, help='user agent of used browser')
     parser.add_argument('--no-download', action='store_true', help='do not download files')
     args = parser.parse_args()
 
     grabber = Grabber(args.profile)
-    grabber.prepare_auth(args.session)
+    grabber.prepare_auth(args.session, args.user_agent)
     grabber.grab_start_page()
     if args.no_download:
         for post in grabber.posts:
