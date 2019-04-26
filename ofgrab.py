@@ -94,7 +94,7 @@ class Grabber:
         data = {'data': more_id}
         r = self.session.post('https://onlyfans.com/component/entities/post/more', data=data, headers=headers)
         soup = BeautifulSoup(r.text, 'lxml')
-        posts = soup.select('div[class^="user_post user_post_"]')
+        posts = soup.select('div[class^="b-post b-post_"]')
         if posts:
             print('[!] Found {} more posts'.format(len(posts)))
             self.parse_posts(posts)
@@ -105,7 +105,6 @@ class Grabber:
         os.makedirs(base_path, exist_ok=True)
         os.makedirs(os.path.join(base_path, 'images'), exist_ok=True)
         os.makedirs(os.path.join(base_path, 'videos'), exist_ok=True)
-        os.makedirs(os.path.join(base_path, 'previews'), exist_ok=True)
         for post in self.posts:
             if post.media_type == MediaType.IMAGE:
                 folder = 'images'
