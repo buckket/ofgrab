@@ -57,7 +57,19 @@ class Grabber:
                     media_url = post.select('source[type="video/mp4"]')[0]['src']
                     self.posts.append(Post(post_id, post_author, post_title, MediaType.VIDEO, media_url, preview_url))
                     print('- Added video from post {}'.format(post_id))
-                except (IndexError, KeyError):
+                except (IndexError, KeyError) as e:
+                    print('[!] Error while processing post {}'.format(post_id))
+                    continue
+            elif post.select('div[class="swiper-wrapper"]'):
+                try:
+                    media_urls = []
+                    figures = post.select('figure[class^="swiper-slide"]')
+                    for figure in figures:
+                        if figure['data-full'] not in media_urls:
+                            media_urls.append(figure['data-full'])
+                            self.posts.append(Post(post_id, post_author, post_title, MediaType.IMAGE, figure['data-full'], None))
+                            print('- Added image from post {}'.format(post_id))
+                except (IndexError, KeyError) as e:
                     print('[!] Error while processing post {}'.format(post_id))
                     continue
             else:
@@ -65,7 +77,7 @@ class Grabber:
                     media_url = post.select('a[data-toggle="lightbox"]')[0]['href']
                     self.posts.append(Post(post_id, post_author, post_title, MediaType.IMAGE, media_url, None))
                     print('- Added image from post {}'.format(post_id))
-                except (IndexError, KeyError):
+                except (IndexError, KeyError) as e:
                     print('[!] Error while processing post {}'.format(post_id))
                     continue
 
@@ -113,11 +125,14 @@ class Grabber:
             else:
                 continue
             path = os.path.join(base_path, folder, os.path.basename(post.media_url))
+            path_hidden = os.path.join(base_path, folder, '.', os.path.basename(post.media_url))
+
             if not os.path.exists(path):
                 print('- Downloading {}'.format(path))
                 r = self.session.get(post.media_url, stream=True)
-                with open(os.path.join(path), 'wb') as f:
+                with open(os.path.join(path_hidden), 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
+                shutil.move(path_hidden, path)
             else:
                 print('- File already exists {}'.format(path))
 
